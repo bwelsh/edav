@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Where the Jobs Are</title>
+<style>
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  margin: auto;
+  position: relative;
+  width: 1060px;
+}
+
+text {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #fff;
+  shape-rendering: crispEdges;
+}
+
+form.mode {
+  position: absolute;
+  right: 10px;
+  top: 50px;
+}
+
+div.tooltip {
+  position: absolute;
+  text-align: center;
+  width: 85px;
+  height: 95px;
+  padding: 8px;
+  font: 12px sans-serif;
+  background: lightsteelblue;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+div.charttitle {
+  font-size: 24pt;
+  text-align: center;
+  padding: 10px;
+}
+
+</style>
+<body>
+<div class="charttitle">Where the Jobs Are...</div>
+<form class="mode">
+  <label><input type="radio" name="mode" value="normal">Normalized</label>
+  <label><input type="radio" name="mode" value="absolute" checked>Absolute</label>
+</form>
+<script src="http://mbostock.github.com/d3/d3.js?1.27.1"></script>
+<script src="includes/visFinal.js"></script>
+<script>
+//age();
+</script>
+Click on the job categories/industries at left to filter for only those jobs. Change the view from absolute to normalized (percent of jobs) 
+through the radio button at the top right.
+</body>
