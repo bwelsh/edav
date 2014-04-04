@@ -16,8 +16,8 @@ My goal with this post was to come up with a graphic that would address those co
 
 ## New (Hopefully Improved) Graphics ##
 
-[New Obesity Graphic](http://bwelsh.github.io/edav/assets/d3obesity.html)
-[Parallel Sets Version](http://bwelsh.github.io/edav/assets/d3obesity_parsets.html)
+-  [New Obesity Graphic](http://bwelsh.github.io/edav/assets/d3obesity.html)
+-  [Parallel Sets Version](http://bwelsh.github.io/edav/assets/d3obesity_parsets.html)
 
 ## Process ##
 
@@ -35,7 +35,7 @@ I built the normalized version (on the left) first, found the colors through the
 
 I then wanted to visualize obesity in absolute terms, so created the graph on the right. I struggled a bit with whether this graphic was useful or just confusing, because the bars are all different widths and so it's difficult to compare them. Also, creating the axis labels turned out to be trouble. The most interesting thing I found here, which was completely missing from the initial article, is that even among women, who have higher obesity rates at lower incomes, many more obese individuals are mid or high income, and not at the lowest income levels. 
 
-Since I wasn't happy with the second mosaic plot, I decided to try and use the parallel sets code to create one of those graphs, as it seemed like a potentially clearer way of visualizing the data in absolute terms. I struggled with it a bit (I couldn't get anything to show up on the page at all, then found [this site](http://www.theage.com.au/national/parsets)) and was able to figure out what I needed to do from there in order to get it to work. I created [this csv](http://bwelsh.github.io/edav/assets/d3obesity.csv) to hold the raw data. I then used the same color picker listed above to change the colors of the paths and played with the formatting of the tooltip a little so the numbers were formatted without 15 decimal places after them. 
+Since I wasn't happy with the second mosaic plot, I decided to try and use the parallel sets code to create one of those graphs, as it seemed like a potentially clearer way of visualizing the data in absolute terms. I struggled with it a bit (I couldn't get anything to show up on the page at all, then found [this site](http://www.theage.com.au/national/parsets)) and was able to figure out what I needed to do from there in order to get it to work. I created [this csv](http://bwelsh.github.io/edav/assets/obesity.csv) to hold the raw data. I then used the same color picker listed above to change the colors of the paths and played with the formatting of the tooltip a little so the numbers were formatted without 15 decimal places after them. 
 
 The best part of this type of visualization is that by changing the order of the dimensions, you can see the data broken out different ways. To explore it, I was manually changing the code at first to see all of the different breakdowns, then decided it would be much better if there was a way on the front end to do this. Drag and drop seemed like the most user-friendly way to go, so I looked around for anything implemented already. I found [this](http://jsfiddle.net/xnjGD/6/), which got me started, but then I had to figure out how to reorder with each move. I created the menu items in a separate svg and then I used the dropHandler provided to implement that functionality. So now if you drag an item above or below other items it will reorder the graph and reset the positions of the moved menu items. 
 
