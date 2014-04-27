@@ -26,19 +26,19 @@ There are two parts to the project, the graphs created with ggplot2 in R and the
 
 A sample of the graphs produced by the R portion are located [here](http://github.com/bwelsh/edav/blob/gh-pages/assets/project/ggplot_graphs/). I made four different types of graphs, the first showing the correlation between two features. In this graph the countries are dots, colored by whether they are classfied as "Eastern" or "Western" countries. For example, the below graph shows the correlation between mean scores in Math on each test by round. Any country above the line performed relatively better on the TIMSS assessment.
 
-[![rplot-1](http://http://bwelsh.github.io/edav/assets/project/ggplot_graphs/cor_round123_Math_Mean.PISA_Mean.TIMSS.png)](http://bwelsh.github.io/edav/assets/project/ggplot_graphs/cor_round123_Math_Mean.PISA_Mean.TIMSS.png)
+[![rplot-1](http://bwelsh.github.io/edav/assets/project/ggplot_graphs/cor_round123_Math_Mean.PISA_Mean.TIMSS.png)](http://bwelsh.github.io/edav/assets/project/ggplot_graphs/cor_round123_Math_Mean.PISA_Mean.TIMSS.png)
 
 The second type of graph is a line graph showing relative performance over multiple rounds. For example, the below graph shows the relative performance in Science mean scores for all three rounds, among the countries that participated in both tests in all three rounds.
 
-[![rplot-2](http://http://bwelsh.github.io/edav/assets/project/ggplot_graphs/multi_round123_Science_Mean.png)](http://http://bwelsh.github.io/edav/assets/project/ggplot_graphs/multi_round123_Science_Mean.png)
+[![rplot-2](http://bwelsh.github.io/edav/assets/project/ggplot_graphs/multi_round123_Science_Mean.png)](http://bwelsh.github.io/edav/assets/project/ggplot_graphs/multi_round123_Science_Mean.png)
 
 The third type of graph is a series of line graphs, one for each country, showing scores over the various rounds. For example, the below graph shows the relative performance in the Math content areas for all three rounds.
 
-[![rplot-3](http://http://bwelsh.github.io/edav/assets/project/ggplot_graphs/content_round123_Math_by_country.png)](http://http://bwelsh.github.io/edav/assets/project/ggplot_graphs/content_round123_Math_by_country.png)
+[![rplot-3](http://bwelsh.github.io/edav/assets/project/ggplot_graphs/content_round123_Math_by_country.png)](http://bwelsh.github.io/edav/assets/project/ggplot_graphs/content_round123_Math_by_country.png)
 
 The fourth type of graph is another series of line graphs, showing for a particular country, the relative performance for different categories. For example, the below graph shows the relative performance of the males and females on the four different content areas of the TIMSS assessment, for Norway.
 
-[![rplot-4](http://http://bwelsh.github.io/edav/assets/project/ggplot_graphs/gender_content_round123_Math_Norway.png)](http://http://bwelsh.github.io/edav/assets/project/ggplot_graphs/gender_content_round123_Math_Norway.png)
+[![rplot-4](http://bwelsh.github.io/edav/assets/project/ggplot_graphs/gender_content_round123_Math_Norway.png)](http://bwelsh.github.io/edav/assets/project/ggplot_graphs/gender_content_round123_Math_Norway.png)
 
 ## Implementation ##
 
@@ -64,6 +64,6 @@ I obviously still have a number of to-dos. I've broken them down into tasks I pl
 ###Tasks For the Future###
 1. For the R graphs, I would really like to refactor the R functions that normalize the data and produce the graphs. There are many opportunities for parameterization and use of canonical R code.
 2. For the map, I would like to change the UI for the menus, to make it more user friendly, and especially to dynamically change the options based on the other options selected. 
-3. An analysis of individual test items. I have the data and would love to see how scores on questions that were asked over multiple testing cycles compared. I did start on R code to do this for TIMSS questions, but in some works for some types of questions currently.
+3. An analysis of individual test items. I have the data and would love to see how scores on questions that were asked over multiple testing cycles compared. I did start on R code to do this for TIMSS questions, but in only works for some types of questions currently.
 
 
