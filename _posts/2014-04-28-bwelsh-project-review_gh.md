@@ -26,19 +26,19 @@ There are two parts to the project, the graphs created with ggplot2 in R and the
 
 A sample of the graphs produced by the R portion are located [here](http://github.com/bwelsh/edav/blob/gh-pages/assets/project/ggplot_graphs/). I made four different types of graphs, the first showing the correlation between two features. In this graph the countries are dots, colored by whether they are classfied as "Eastern" or "Western" countries. For example, the below graph shows the correlation between mean scores in Math on each test by round. Any country above the line performed relatively better on the TIMSS assessment.
 
-[![rplot-1](http://bwelsh.github.io/edav/assets/project/ggplot_graphs/cor_round123_Math_Mean.PISA_Mean.TIMSS.png)](http://bwelsh.github.io/edav/assets/project/ggplot_graphs/cor_round123_Math_Mean.PISA_Mean.TIMSS.png)
+<a href="http://bwelsh.github.io/edav/assets/project/ggplot_graphs/cor_round123_Math_Mean.PISA_Mean.TIMSS.png"><img src="http://bwelsh.github.io/edav/assets/project/ggplot_graphs/cor_round123_Math_Mean.PISA_Mean.TIMSS.png" alt="Correlation Plot" width="200" height="400"></a>
 
 The second type of graph is a line graph showing relative performance over multiple rounds. For example, the below graph shows the relative performance in Science mean scores for all three rounds, among the countries that participated in both tests in all three rounds.
 
-[![rplot-2](http://bwelsh.github.io/edav/assets/project/ggplot_graphs/multi_round123_Science_Mean.png)](http://bwelsh.github.io/edav/assets/project/ggplot_graphs/multi_round123_Science_Mean.png)
+<a href="http://bwelsh.github.io/edav/assets/project/ggplot_graphs/multi_round123_Science_Mean.png"><img src="http://bwelsh.github.io/edav/assets/project/ggplot_graphs/multi_round123_Science_Mean.png" alt="Difference over Time Plot" width="500" height="300"></a>
 
 The third type of graph is a series of line graphs, one for each country, showing scores over the various rounds. For example, the below graph shows the relative performance in the Math content areas for all three rounds.
 
-[![rplot-3](http://bwelsh.github.io/edav/assets/project/ggplot_graphs/content_round123_Math_by_country.png)](http://bwelsh.github.io/edav/assets/project/ggplot_graphs/content_round123_Math_by_country.png)
+<a href="http://bwelsh.github.io/edav/assets/project/ggplot_graphs/content_round123_Math_by_country.png"><img src="http://bwelsh.github.io/edav/assets/project/ggplot_graphs/content_round123_Math_by_country.png" alt="Math Content Plot" width="450" height="500"></a>
 
 The fourth type of graph is another series of line graphs, showing for a particular country, the relative performance for different categories. For example, the below graph shows the relative performance of the males and females on the four different content areas of the TIMSS assessment, for Norway.
 
-[![rplot-4](http://bwelsh.github.io/edav/assets/project/ggplot_graphs/gender_content_round123_Math_Norway.png)](http://bwelsh.github.io/edav/assets/project/ggplot_graphs/gender_content_round123_Math_Norway.png)
+<a href="http://bwelsh.github.io/edav/assets/project/ggplot_graphs/gender_content_round123_Math_Norway.png"><img src="http://bwelsh.github.io/edav/assets/project/ggplot_graphs/gender_content_round123_Math_Norway.png" alt="Gender Country Plot" width="500" height="400"></a>
 
 ## Implementation ##
 
