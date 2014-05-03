@@ -35,7 +35,7 @@ I first wrote a few R functions, posted [here](http://github.com/bwelsh/edav/blo
 Similarly, running this line produces the below plot, showing the changes in popularity of the name Lauren for girls over time.
 
     source("calcpopTotals.R")
-    plotName("both", "Sandy")
+    plotName("F", "Lauren")
 
 <a href="http://bwelsh.github.io/edav/assets/popularity_lauren.png"><img src="http://bwelsh.github.io/edav/assets/popularity_lauren.png" alt="Lauren Popularity" width="310" height="160"></a>
 
@@ -51,7 +51,7 @@ In order to display the correct data when the name is selected, I'm using the d3
 
 To show the changes in the name popularity over time, I found [this slider](http://bl.ocks.org/mbostock/6452972) that I was able to adapt and automate, so that when a name is selected, the graphic shows the changes over time. You can also manually change the slider to see a particular time. It would be nice to add a feature to allow the user to go to a particular year, as that is not easy to do with the current implementation. The slider is also jittery sometimes, I haven't been able to figure out what causes that. I'm using the event of the slider moving to trigger an update of the graph data/colors, and using the transition capability to match the timing of the slider moving and the colors changing. I'm also using the d3-tip library to show the percentages and counts for each name for each state on hover.
 
-I wanted the user to be able to choose a name to view, so I initially started out with dropdowns (when I only had a few names I was testing with), but didn't like that user experience, especially when there are a lot of names. What I wanted was a box that would allow the user to type in a name, but offer suggestions for the available names. I found a library [here](http://complete.ly/appspot.com) that did what I wanted, after a bit of configuration. 
+I wanted the user to be able to choose a name to view, so I initially started out with dropdowns (when I only had a few names I was testing with), but didn't like that user experience, especially when there are a lot of names. What I wanted was a box that would allow the user to type in a name, but offer suggestions for the available names. I found a library [here](http://complete-ly/appspot.com) that did what I wanted, after a bit of configuration. 
 
 Lastly, I wanted to add a legend at the bottom, to give the colors a little context. I used the svg gradient to do that, based on [this example](http://bl.ocks.org/mbostock/1086421). There is some brittle code here that would benefit from refactoring.
 
