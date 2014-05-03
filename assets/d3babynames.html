@@ -471,17 +471,17 @@ function updateLegend() {
 	var legend_data;
 	//Set data for legend text, this could be made less brittle
 	if (selected === 'compare') {
-		legend_data = [{"content": "100% male", "location": 330, "color": "#FFFFFF"}, {"content": "100% female", "location": 820, "color": "#FFFFFF"}];
+		legend_data = [{"content": "Male", "location": 300, "color": "#FFFFFF"}, {"content": "Female", "location": 700, "color": "#FFFFFF"}];
 	}
 	else {
-		legend_data = [{"content": "0%", "location": 330, "color": "#111111"}, {"content": ">4%", "location": 880, "color": "#FFFFFF"}];;
+		legend_data = [{"content": "0%", "location": 300, "color": "#111111"}, {"content": ">4%", "location": 700, "color": "#FFFFFF"}];;
 	}
 	d3.select("#legend").selectAll('svg').remove();
 	//Create gradient for legend, code taken from example referenced above
 	var legend = d3.select("#legend").append("svg:svg")
 		.attr("width", width+margin.right)
 		.attr("height", 40)
-		.attr("transform", 'translate('+(-margin.left)+',0)');
+		.attr("transform", 'translate(0,0)');
 
 	var gradient = legend.append("svg:defs")
 	  .append("svg:linearGradient")
@@ -505,7 +505,7 @@ function updateLegend() {
 	legend.append("svg:rect")
 		.attr("width", 600)
 		.attr("height", 30)
-		.attr("transform", "translate(320, 0)")
+		.attr("transform", "translate(225, 0)")
 		.style("fill", "url(#gradient)");
 	//Set legend text using data specified above	
 	legend.selectAll("text")
