@@ -471,10 +471,10 @@ function updateLegend() {
 	var legend_data;
 	//Set data for legend text, this could be made less brittle
 	if (selected === 'compare') {
-		legend_data = [{"content": "Male", "location": 300, "color": "#FFFFFF"}, {"content": "Female", "location": 700, "color": "#FFFFFF"}];
+		legend_data = [{"content": "Male", "location": 265, "color": "#FFFFFF"}, {"content": "Female", "location": 750, "color": "#FFFFFF"}];
 	}
 	else {
-		legend_data = [{"content": "0%", "location": 300, "color": "#111111"}, {"content": ">4%", "location": 700, "color": "#FFFFFF"}];;
+		legend_data = [{"content": "0%", "location": 265, "color": "#111111"}, {"content": ">4%", "location": 750, "color": "#FFFFFF"}];;
 	}
 	d3.select("#legend").selectAll('svg').remove();
 	//Create gradient for legend, code taken from example referenced above
