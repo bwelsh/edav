@@ -1,12 +1,16 @@
 loadCountryData <- function(file) {
   data <- read.csv(file)
+  return (data)
 }
 
 getMatchedCountries <- function(file, rounds) {
-  data <- loadCountryData(file)
+  data <- loadCountryData(file) #load in data from file name passed in
   countries <- subset(data, Round == rounds[1], select=c("Country"))
   countries <- levels(countries$Country)[countries$Country]
-  for (i in rounds) {
+  #For each round, subset the data for just that round for each test
+  #Get a list of those countries
+  #Find the intersection of all of the countries as this gives us the matched countries over all rounds passed in
+  for (i in rounds) { 
     pisa_countries <- subset(data, Round == i & Test == "PISA", select=c("Country"))
     timss_countries <- subset(data, Round == i & Test == "TIMSS", select=c("Country"))
     pisa_countries <- levels(pisa_countries$Country)[pisa_countries$Country]
@@ -17,384 +21,155 @@ getMatchedCountries <- function(file, rounds) {
   return (countries)
 }
 
-plotCorrelation <- function(file, rounds, subject, stat1="Mean.PISA", stat2="Mean.TIMSS", ext) {
-  require(ggplot2)
-  require(gridExtra)
-  countries <- getMatchedCountries(file, rounds)
-  #Get matched countries for each round
-  normed_data <- getContent(file, rounds, subject, countries)
-  normed_data <- reshape(normed_data, timevar="Metric_Name", idvar=c("Country", "Round", "Region"), direction="wide")
-  plots <- list()
-  num_columns = as.integer(sqrt(length(rounds)))
-  correlations <- paste("Correlations in ", subject, " between ", stat1, " and ", stat2, " are:", sep="")
-  for (i in rounds) {
-    chart_title <- paste("Round", i, stat1, "vs", stat2, sep=" ")
-    round_df <- normed_data[which(normed_data$Round == i), ]
-    xmetric <- paste("Scaled_Score.", stat1, sep="")
-    ymetric <- paste("Scaled_Score.", stat2, sep="")
-    plt <- ggplot(round_df, aes_string(x=xmetric, y=ymetric, colour="Region"))
-    this_plot <- list(plt + labs(title=chart_title) + geom_point(shape=19, size=5) + xlim(-2.5, 2.5) + ylim(-2.5, 2.5) + geom_abline(intercept = 0, slope = 1))
-    plots <- c(plots, this_plot)
-    correlation <- cor(cbind(round_df[, xmetric], round_df[, ymetric]))[1,2]
-    prt_str <- paste("Round", i, "correlation between", stat1, "and", stat2, "is", correlation, sep=" ")
-    correlations <- paste(correlations, prt_str, sep="\n")
-  }
-  plot_name <- createPlotName("cor", rounds, subject, paste(stat1, "_", stat2, sep=""), ext)
-  png(plot_name, width=1000, height=2000, units="px")
-  do.call(grid.arrange, c(plots, list(ncol=num_columns)))
-  dev.off()
-  return (correlations)
-}
-
-statRoundCompare <- function(file, round, subject, stat) {
-  data <- loadCountryData(file)
-  data <- matchedCountryData(data, round)
-  shaped <- shapeWide(data, subject)
-  standard <- standardizeScores(data, subject)
-  agg <- aggMetric(shaped, standard, stat)
-}
-
-statMultiRoundCompare <- function(file, rounds, subject, stat) {
-  #Gets country list for multiple rounds
-  data <- loadCountryData(file)
-  countries <- getMatchedCountries(file, rounds)
-  #Get matched countries for each round
-  normed_data <- list()
-  for (i in rounds) {
-    matched_data <- subset(data, Round == i & Country %in% countries)
-    shaped <- shapeWide(matched_data, subject)
-    standard <- standardizeScores(matched_data, subject)
-    agg <- aggMetric(shaped, standard, stat)
-    agg_list <- list(agg)
-    normed_data <- c(normed_data, agg_list)
-  }
-  return (normed_data)
-}
-
-createPlotName <- function(plot_type, rounds, subject, extra, extension) {
-  round_string <- "round"
-  for (i in rounds) {
-    round_string <- paste(round_string, i, sep="")
-  }
-  name <- paste(plot_type, "_", round_string, "_", subject, "_", extra, ".", extension, sep="")
-  return (name)
-}
-
-plotMultiRound <- function(file, rounds, subject, stat, ext) {
-  library(ggplot2)
-  chart_title <- paste("Test Differential for", subject, stat, "in Scaled Scores by Country over Time", sep=" ")
-  graph_df <- getMultiRound(file, rounds, subject, stat)
-  plt <- ggplot(graph_df, aes(x=Round, y=PISA_Advantage, group=Country_List, colour=Country_List))
-  plt + labs(title=chart_title) + geom_line()
-  plot_name <- createPlotName("multi", rounds, subject, stat, ext)
-  ggsave(plot_name)
-}
-
-getGenderData <- function(file, rounds, subject="Math", country) {
-  #TODO fix subject
-  #TODO gender and science (not contents)
-  data <- loadCountryData(file)
-  countries <- getMatchedCountries(file, rounds)
-  normed_data <- data.frame()
-  stats <- c("Num", "Alg", "Geom", "Data")
-  for (i in rounds) {
-    matched_data <- subset(data, Round == i & Country %in% countries)
-    #shaped <- shapeWide(matched_data, subject)
-    standard <- standardizeScores(matched_data, subject)
-    agg <- aggContent(standard, "Mean.PISA")
-    Statistic <- rep("All", nrow(agg))
-    agg <- cbind.data.frame(agg, Statistic)
-    agg_timss <- aggContent(standard, "Mean.TIMSS")
-    Statistic <- rep("All", nrow(agg_timss))
-    agg_timss <- cbind.data.frame(agg_timss, Statistic)
-    agg <- rbind.data.frame(agg, agg_timss)
-    for (j in stats) {
-      agg_content <- data.frame()
-      col_name <- paste("Con.", j, ".TIMSS", sep="")
-      #print(head(standard,1))
-      agg_content <- rbind.data.frame(agg_content, aggContent(standard, col_name))
-      col_name <- paste("Con.", j, ".M.TIMSS", sep="")
-      agg_content <- rbind.data.frame(agg_content, aggContent(standard, col_name))
-      col_name <- paste("Con.", j, ".F.TIMSS", sep="")
-      agg_content <- rbind.data.frame(agg_content, aggContent(standard, col_name))
-      Statistic <- rep(j, nrow(agg_content))
-      agg <- rbind.data.frame(agg, cbind.data.frame(agg_content, Statistic))
+generateColumnNames <- function(plot_by, content="all") {
+  #Given the content areas (should be figured out programatically), and feature to plot by
+  # assemble a list of the metrics we need (which are column names in the data frame)
+  all_contents <- c("Num", "Alg", "Geom", "Data")
+  appends <- c("", ".M", ".F")
+  ret_content = vector()
+  if (plot_by == "Gender Content") {
+    for (i in appends) {
+      ret_content <- c(ret_content, paste("Con.", content, i, ".TIMSS", sep=""))
     }
-    Round <- rep(i, nrow(agg))
-    agg <- cbind(agg, Round)
-    #agg_list <- list(agg)
-    normed_data <- rbind.data.frame(normed_data, agg)
   }
-  return (normed_data)
-}
-
-plotGenderTest <- function(file, rounds, subject, test, stat, ext) {
-  require(ggplot2)
-  require(gridExtra)
-  countries <- getMatchedCountries(file, rounds)
-  #Get matched countries for each round
-  normed_data <- getContent(file, rounds, subject, countries)
-  normed_data <- reshape(normed_data, timevar="Metric_Name", idvar=c("Country", "Round", "Region"), direction="wide")
-  plots <- list()
-  #TODO fix num_columns
-  num_columns = as.integer(sqrt(length(rounds)))
-  for (i in rounds) {
-    #TODO add axis labels
-    chart_title <- paste("Round", i, "M vs F", subject, stat, "in", test, sep=" ")
-    xmetric <- paste("Scaled_Score.", stat, ".M.", test, sep="")
-    ymetric <- paste("Scaled_Score.", stat, ".F.", test, sep="")
-    round_df <- normed_data[which(normed_data$Round == i), ]
-    round_df <- cbind.data.frame(round_df$Country, round_df$Region, round_df[,xmetric], round_df[,ymetric])
-    names(round_df) <- c("Country", "Region", "Male", "Female")
-    plt <- ggplot(round_df, aes(x=Male, y=Female, colour=Region))
-    this_plot <- list(plt + labs(title=chart_title) + geom_point(shape=19, size=5) + xlim(-2.5, 2.5) + ylim(-2.5, 2.5) + geom_abline(intercept = 0, slope = 1))
-    plots <- c(plots, this_plot)
+  else if (plot_by == "Overall Content") {
+    for (i in all_contents) {
+      ret_content <- c(ret_content, paste("Con.", i, ".TIMSS", sep=""))
+    }
   }
-  plot_name <- createPlotName("gender_cor", rounds, paste(subject, stat, sep="_"), test, ext)
-  png(plot_name, width=1000, height=2000, units="px")
-  do.call(grid.arrange, c(plots, list(ncol=num_columns)))
-  dev.off()
-}
-
-plotGenderDifference <- function(file, rounds, subject, test, stat, ext) {
-  require(ggplot2)
-  countries <- getMatchedCountries(file, rounds)
-  #Get matched countries for each round
-  normed_data <- getContent(file, rounds, subject, countries)
-  normed_data <- reshape(normed_data, timevar="Metric_Name", idvar=c("Country", "Region", "Round"), direction="wide")
-  male <- paste("Scaled_Score.", stat, ".M.", test, sep="")
-  female <- paste("Scaled_Score.", stat, ".F.", test, sep="")
-  country_df <- subset(normed_data, normed_data$Country %in% countries, select=c("Country", "Round", male, female))
-  Male_Advantage <- country_df[[male]] - country_df[[female]]
-  chart_title <- paste("Gender Difference in", test, subject, stat, "Score over Time", sep=" ")
-  country_df <- cbind.data.frame(country_df, Male_Advantage)
-  plt <- ggplot(country_df, aes(x=Round, y=Male_Advantage, group=Country, colour=Country))
-  plt + labs(title=chart_title) + geom_line()
-  plot_name <- createPlotName("gender_diff", rounds, paste(subject, stat, sep="_"), test, ext)
-  ggsave(plot_name, width=8, height=5, units="in")
-}
-
-plotGender <- function(file, rounds, subject="Math", country, ext) {
-  require(ggplot2)
-  require(gridExtra)
-  stats <- c("Num", "Alg", "Geom", "Data")
-  normed_data <- getGenderData(file, rounds, subject)
-  plots <- list()
-  for (i in stats) {
-    chart_title <- paste(country, i, "Content", sep = " ")
-    #print(i)
-    country_df <- normed_data[which(normed_data$Country == country & (normed_data$Statistic == "All" | normed_data$Statistic == i)), ]
-    #print(head(country_df,1))
-    plt <- ggplot(country_df, aes(x=Round, y=Scaled_Score, group=Metric_Name, colour=Metric_Name))
-    this_plot <- list(plt + labs(title=chart_title) + geom_line())
-    plots <- c(plots, this_plot)
-  }
-  plot_name <- createPlotName("gender_content", rounds, subject, country, ext)
-  png(plot_name, width=3000, height=2000, units="px")
-  do.call(grid.arrange, c(plots, list(ncol=2)))
-  dev.off()
-}
-
-plotGenderSubjects <- function(file, rounds, subject="Math", stat, ext) {
-  require(ggplot2)
-  require(gridExtra)
-  countries <- getMatchedCountries(file, rounds)
-  normed_data <- getGenderData(file, rounds, subject)
-  num_columns = as.integer(sqrt(length(countries)))
-  plots <- list()
-  for (i in countries) {
-    chart_title <- paste(i, stat, "Content", sep = " ")
-    #print(i)
-    country_df <- normed_data[which(normed_data$Country == i & (normed_data$Statistic == "All" | normed_data$Statistic == stat)), ]
-    #print(head(country_df,1))
-    plt <- ggplot(country_df, aes(x=Round, y=Scaled_Score, group=Metric_Name, colour=Metric_Name))
-    this_plot <- list(plt + labs(title=chart_title) + geom_line() + ylim(-2.5, 2.5))
-    plots <- c(plots, this_plot)
-  }
-  plot_name <- createPlotName("gender_subject", rounds, subject, stat, ext)
-  png(plot_name, width=3000, height=2000, units="px")
-  do.call(grid.arrange, c(plots, list(ncol=num_columns)))
-  dev.off()
+  return (ret_content)
 }
 
 getContent <- function(file, rounds, subject, countries) {
-  normed_data <- data.frame()
-  data <- loadCountryData(file)
+  #Data "munge" function to get the metrics we need in order to plot
+  normed_data <- data.frame() #Create empty dataframe to hold results
+  data <- loadCountryData(file) #load in data
   stats <- c("Mean", "Con.Num", "Con.Alg", "Con.Geom", "Con.Data")
   appends <- c("", ".M", ".F")
   for (i in rounds) {
+    #For each round, subset the data to get only for this round and for the countries passed in
     matched_data <- subset(data, Round == i & Country %in% countries)
-    standard <- standardizeScores(matched_data, subject)
-    agg <- aggContent(standard, "Mean.PISA")
-    agg <- rbind.data.frame(agg, aggContent(standard, "Mean.M.PISA"))
-    agg <- rbind.data.frame(agg, aggContent(standard, "Mean.F.PISA"))
-    agg <- rbind.data.frame(agg, aggContent(standard, "StDev.PISA"))
-    agg <- rbind.data.frame(agg, aggContent(standard, "StDev.TIMSS"))
-    for (j in stats) {
-      for (k in appends) {
-        stat_name <- paste(j, k, ".TIMSS", sep="")
-        agg <- rbind.data.frame(agg, aggContent(standard, stat_name))
-      }
-    }
-    Round <- rep(i, nrow(agg))
-    agg <- cbind(agg, Round)
-    normed_data <- rbind.data.frame(normed_data, agg)
+    standard <- standardizeScores(matched_data, subject) #normalize the scores from the subset
+    normed_data <- rbind(normed_data, standard) #combine with results dataframe
   }
   return (normed_data)
 }
 
-plotSubjectCorrelation <- function(file, rounds, stat1="Mean.PISA", stat2="Mean.TIMSS", ext) {
-  require(ggplot2)
-  require(gridExtra)
-  countries <- getMatchedCountries(file, rounds)
-  #Get matched countries for each round
-  normed_math_data <- getContent(file, rounds, "Math", countries)
-  normed_math_data <- reshape(normed_math_data, timevar="Metric_Name", idvar=c("Country", "Round", "Region"), direction="wide")
-  normed_science_data <- getContent(file, rounds, "Science", countries)
-  normed_science_data <- reshape(normed_science_data, timevar="Metric_Name", idvar=c("Country", "Round", "Region"), direction="wide")
-  plots <- list()
-  #TODO fix num_columns
-  num_columns = as.integer(sqrt(length(rounds)))
-  correlations <- paste("Correlations between Math ", stat1, " and Science ", stat2, " are:", sep="")
-  for (i in rounds) {
-    #TODO add axis labels
-    chart_title <- paste("Round", i, stat1, "vs", stat2, sep=" ")
-    xmetric <- paste("Scaled_Score.", stat1, sep="")
-    ymetric <- paste("Scaled_Score.", stat2, sep="")
-    round_math_df <- normed_math_data[which(normed_math_data$Round == i), ]
-    round_science_df <- normed_science_data[which(normed_science_data$Round == i), ]
-    round_df <- cbind.data.frame(round_math_df$Country, round_math_df$Region, round_math_df[,xmetric], round_science_df[,ymetric])
-    names(round_df) <- c("Country", "Region", "Math", "Science")
-    plt <- ggplot(round_df, aes(x=Math, y=Science, colour=Region))
-    this_plot <- list(plt + labs(title=chart_title) + geom_point(shape=19, size=5) + xlim(-2.5, 2.5) + ylim(-2.5, 2.5) + geom_abline(intercept = 0, slope = 1))
-    plots <- c(plots, this_plot)
-    correlation <- cor(cbind(round_df$Math, round_df$Science))[1,2]
-    prt_str <- paste("Round", i, "correlation between", stat1, "and", stat2, "is", correlation, sep=" ")
-    correlations <- paste(correlations, prt_str, sep="\n")
-  }
-  plot_name <- createPlotName("subject_cor", rounds, stat1, stat2, ext)
-  png(plot_name, width=1000, height=2000, units="px")
-  do.call(grid.arrange, c(plots, list(ncol=num_columns)))
-  dev.off()
-  return (correlations)
-}
-
-plotContent <- function(file, rounds, subject="Math", ext) {
-  require(ggplot2)
-  require(gridExtra)
-  #TODO add meas and fix vector
-  #TODO fix subject
-  countries <- getMatchedCountries(file, rounds)
-  #Get matched countries for each round
-  normed_data <- getContent(file, rounds, subject, countries)
-  content_list <- c("Mean.PISA", "Mean.TIMSS")
-  if (subject == "Math") {
-    content_list <- c(content_list, "Con.Num.TIMSS", "Con.Alg.TIMSS", "Con.Geom.TIMSS", "Con.Data.TIMSS")
-  }
-  plots <- list()
-  num_columns = as.integer(sqrt(length(countries)))
-  for (i in countries) {
-    chart_title <- paste(i, "Content", sep = " ")
-    country_df <- normed_data[which(normed_data$Country == i & normed_data$Metric_Name %in% content_list), ]
-    plt <- ggplot(country_df, aes(x=Round, y=Scaled_Score, group=Metric_Name, colour=Metric_Name))
-    this_plot <- list(plt + labs(title=chart_title) + geom_line() + ylim(-2.5, 2.5))
-    plots <- c(plots, this_plot)
-  }
-  plot_name <- createPlotName("content", rounds, subject, "by_country", ext)
-  png(plot_name, width=3000, height=2000, units="px")
-  do.call(grid.arrange, c(plots, list(ncol=num_columns)))
-  dev.off()
-}
-
-aggContent <- function(norm_data, stat) {
-  #col_name <- paste(stat, ".", test, sep="")
-  agg_data <- cbind.data.frame(levels(norm_data$Country)[norm_data$Country], norm_data$Region, norm_data[[stat]])
-  metric <- rep(stat, nrow(agg_data))
-  agg_data <- cbind.data.frame(agg_data, metric)
-  names(agg_data) <- c("Country", "Region", "Scaled_Score", "Metric_Name")
-  return (agg_data)
-}
-
-plotSubjects <- function(file, rounds, stat, country="all", ext) {
-  #TODO same axis for all plots
-  #TODO remove legend, fix up chart titles
-  require(ggplot2)
-  require(gridExtra)
-  math_df <- getMultiRound(file, rounds, "Math", stat)
-  science_df <- getMultiRound(file, rounds, "Science", stat)
-  Subject <- rep("Math", nrow(math_df))
-  math_df <- cbind.data.frame(math_df, Subject)
-  Subject <- rep("Science", nrow(science_df))
-  science_df <- cbind.data.frame(science_df, Subject)
-  subject_df <- rbind.data.frame(math_df, science_df)
-  plots <- list()
-  if (country == "all") {
-    countries <- getMatchedCountries(file, rounds)
-    for (i in countries) {
-      chart_title <- paste(i, "Math vs Science over Time", sep = " ")
-      country_df <- subject_df[which(subject_df$Country_List == i), ]
-      plt <- ggplot(country_df, aes(x=Round, y=PISA_Advantage, group=Subject, colour=Subject))
-      this_plot <- list(plt + labs(title=chart_title) + geom_line())
-      plots <- c(plots, this_plot)
-    }
-    num_columns = as.integer(sqrt(length(countries)))
-  }
-  else {
-    chart_title <- paste(country, "Math vs Science over Time", sep = " ")
-    country_df <- subject_df[which(subject_df$Country_List == country), ]
-    plt <- ggplot(country_df, aes(x=Round, y=PISA_Advantage, group=Subject, colour=Subject))
-    this_plot <- list(plt + labs(title=chart_title) + geom_line())
-    plots <- c(plots, this_plot)
-    num_columns = 1
-  }
-  plot_name <- createPlotName("subjects", rounds, stat, country, ext)
-  png(plot_name, width=3000, height=2000, units="px")
-  do.call(grid.arrange, c(plots, list(ncol=num_columns)))
-  dev.off()
-}
-
-getMultiRound <- function(file, rounds, subject, stat) {
-  data_list <- statMultiRoundCompare(file, rounds, subject, stat)
-  #Initialize variables
-  Round <- vector()
-  PISA_Advantage <- vector()
-  Country_List <- vector()
-  count <- 1
-  for (i in rounds) {
-    round_data <- data_list[[count]]
-    Round <- c(Round, rep(rounds[count], nrow(round_data)))
-    PISA_Advantage <- c(PISA_Advantage, as.numeric(levels(round_data[,4])[round_data[,4]]) - as.numeric(levels(round_data[,6])[round_data[,6]]))
-    Country_List <- c(Country_List, levels(round_data$Country)[round_data$Country])
-    count <- count + 1
-  }
-  graph_df <- cbind.data.frame(Round, PISA_Advantage, Country_List)
-}
-
-aggMetric <- function(data, norm_data, stat) {
-  pisa <- paste(stat, ".PISA", sep="")
-  timss <- paste(stat, ".TIMSS", sep="")
-  agg_data <- as.data.frame(cbind(levels(data$Country)[data$Country], levels(data$Region)[data$Region], data[[pisa]], norm_data[[pisa]], data[[timss]], norm_data[[timss]]))
-  names(agg_data) <- c("Country", "Region", pisa, "PISA normed", timss, "TIMSS normed")
-  return (agg_data)
-}
-
 shapeWide <- function(data, subject) {
+  #Subset data for the subject passed in and reshape to wide format
   sub_data <- data[data$Subject == subject, ]
   reshaped <- reshape(sub_data, timevar="Test", idvar=c("Country", "Region", "Round", "Subject"), direction="wide")
+  return (reshaped)
 }
 
 standardizeScores <- function(data, subject) {
+  #After subsetting/putting in wide format, normalize all but first 4 columns and return
   reshaped <- shapeWide(data, subject)
-  #print (head(reshaped, 1))
   standard <- cbind(reshaped[,c(1:4)], scale(reshaped[, -c(1:4)]))
+  return (standard)
 }
 
-matchedCountryData <- function(data, round) {
-  #given round, return vectors with those countries
-  pisa <- subset(data, Round == round & Test == "PISA", select = "Country")
-  pisa_countries <- levels(pisa$Country)[pisa$Country]
-  timss <- subset(data, Round == round & Test == "TIMSS", select = "Country")
-  timss_countries <- levels(timss$Country)[timss$Country]
-  matches <- intersect(pisa_countries, timss_countries)
-  matched_data <- subset(data, Round == round & Country %in% matches)
+plotCorrelations <- function(file, rounds, plot_by, subjectx="Math", subjecty="Math", statx="Mean.PISA", staty="Mean.TIMSS") {
+  #Plots correlation between subject or statistic, for both male and female or just one
+  require(ggplot2)
+  countries <- getMatchedCountries(file, rounds)
+  #Get data in correct format for both subjects
+  normed_x_data <- getContent(file, rounds, subjectx, countries)
+  normed_y_data <- getContent(file, rounds, subjecty, countries)
+  #Set the name of the x and y metric based on the values passed in
+  if (plot_by == "Gender") {
+    test_split <- strsplit(statx, "\\.")
+    xmetric <- paste(test_split[[1]][1], ".F.", test_split[[1]][2], ".x", sep="")
+    ymetric <- paste(test_split[[1]][1], ".M.", test_split[[1]][2], ".y", sep="")
+  }
+  else {
+    xmetric <- paste(statx, ".x", sep="")
+    ymetric <- paste(staty, ".y", sep="")
+  }
+  chart_title <- paste("Correlation of", plot_by, subjectx, statx, "vs", subjecty, staty, "by Round", sep=" ")
+  #Merge the two dataframes for x and y data, get the columns we want and name them
+  round_df <- merge(normed_x_data, normed_y_data, by=c("Country", "Region", "Round"))
+  round_df <- round_df[, c("Country", "Region", "Round", xmetric, ymetric)]
+  names(round_df) <- c("Country", "Region", "Round", xmetric, ymetric)
+  #Return a series of scatterplots grouped by region, with a regression line for each region
+  #Split by round so each plot represents one round
+  plt <- ggplot(round_df, aes_string(x=xmetric, y=ymetric, colour="Region", Group="Region")) + labs(title=chart_title)
+  plt <- plt + geom_point(shape=19, size=2) + geom_abline(intercept = 0, slope = 1) + stat_smooth(method="lm", se=FALSE) + theme(aspect.ratio=1)
+  return(plt + facet_wrap(~ Round, ncol=1))
+}
+
+plotAdvantage <- function(file, rounds, plot_by, subject, stat="Mean", test="TIMSS", gender="all") {
+  #Plots the advantage (either on a test or by gender) for the statistic passed in
+  require(ggplot2)
+  countries <- getMatchedCountries(file, rounds)
+  normed_data <- getContent(file, rounds, subject, countries) #Get data in needed format
+  #Put together the name of the metrics we'll be subtracting to find out the difference between the two
+  if (plot_by == "Test") {
+    gen = ""
+    if (gender != "all") {
+      gen = paste(".", gender, sep="")
+    }
+    adv_val <- paste(stat, gen, ".PISA", sep="")
+    other_val <- paste(stat, gen,".TIMSS", sep="")
+    adv_metric <- paste("PISA ", gen, sep="")
+  }
+  else if (plot_by == "Gender") {
+    adv_val <- paste(stat, ".M.", test, sep="")
+    other_val <- paste(stat, ".F.", test, sep="")
+    adv_metric <- paste("Male (", test, ")", sep="")
+  }
+  #Subset the data for only the columns we want, and add a column for the difference
+  country_df <- normed_data[, c("Country", "Round", adv_val, other_val)]
+  country_df$Advantage <- country_df[[adv_val]] - country_df[[other_val]]
+  chart_title <- paste(adv_metric, "Advantage in", subject, stat, "Score over Time", sep=" ")
+  #Return a plot of the difference by round for the metric we're looking at
+  plt <- ggplot(country_df, aes(x=Round, y=Advantage, group=Country, colour=Country))
+  return (plt + labs(title=chart_title) + geom_line())
+}
+
+plotMathContent <- function(file, rounds, plot_by, content="all") {
+  #Plots details in the math content domains for TIMSS, either by gender or just overall
+  require(ggplot2)
+  constant_columns <- c("Country", "Region", "Round") #Columns we will not want to reshape
+  countries <- getMatchedCountries(file, rounds)
+  normed_data <- getContent(file, rounds, "Math", countries) #Get the data in the format we need
+  num_columns = as.integer(sqrt(length(countries))) #The number of columns we want in our plot, keep as square as possible
+  #Based on the parameter passed in, get a list of the metrics we want and create a title for the plot
+  if (plot_by == "Gender Content") {
+    lines <- c("Mean.PISA", "Mean.TIMSS", generateColumnNames(plot_by, content))
+    chart_title <- paste("Gender Difference in", content, "domain", sep=" ")
+  }
+  else {
+    lines <- c("Mean.PISA", "Mean.TIMSS", generateColumnNames(plot_by))
+    chart_title <- "Country Scores by TIMSS Content Area"
+  }
+  #Subset data based on metric list found above, then reshape for plotting
+  normed_data <- normed_data[, c(constant_columns, lines)]
+  normed_data <- reshape(normed_data, varying=lines, v.names="Scaled_Score", times=lines, idvar=constant_columns, direction="long")
+  names(normed_data) <- c("Country", "Region", "Round", "Metric_Name", "Scaled_Score")
+  #Return a plot with the score for each metric, with one subplot per country
+  plt <- ggplot(normed_data, aes(x=Round, y=Scaled_Score, group=Metric_Name, colour=Metric_Name)) + labs(title=chart_title) + geom_line()
+  plt <- plt + labs(title=chart_title) + geom_line()
+  return (plt + facet_wrap(~ Country, ncol=num_columns))
+}
+
+plotSubjects <- function(file, rounds, stat) {
+  #Plot the advantage in PISA of each country by subject for the statistic passed in
+  require(ggplot2)
+  countries <- getMatchedCountries(file, rounds)
+  #Get the data in the format we need, then add a column with the subject name
+  normed_x_data <- getContent(file, rounds, "Math", countries)
+  normed_x_data$Subject <- rep("Math", nrow(normed_x_data))
+  normed_y_data <- getContent(file, rounds, "Science", countries)
+  normed_y_data$Subject <- rep("Science", nrow(normed_y_data))
+  normed_data <- rbind(normed_x_data, normed_y_data)
+  #Create a string to hold the metric values we will later subtract to get our differences
+  adv_val <- paste(stat,".PISA", sep="")
+  other_val <- paste(stat, ".TIMSS", sep="")
+  chart_title <- "Math vs Science over Time"
+  #Add a column with the difference between the metrics
+  normed_data$PISA_Advantage <- normed_data[[adv_val]] - normed_data[[other_val]]
+  #Return a plot with the PISA advantage by subject, with subpots for each country
+  plt <- ggplot(normed_data, aes(x=Round, y=PISA_Advantage, group=Subject, colour=Subject)) + labs(title=chart_title) + geom_line()
+  return (plt + facet_wrap(~ Country, ncol=as.integer(sqrt(length(countries)))))
 }

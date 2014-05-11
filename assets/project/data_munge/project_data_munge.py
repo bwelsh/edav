@@ -26,21 +26,21 @@ f.close()
 
 for i in range(0, len(country_abb)):
     out_dict[country_abb[i]] = {}
-    for test in ['Test', 'PISA', 'TIMSS']:
+    for test in ['Compare', 'PISA', 'TIMSS']:
         out_dict[country_abb[i]][test] = {}
-        for filt in ['Round Filter', '1-2-3', '1-2', '1-3', '2-3']:
+        for filt in ['1-2-3', '1-2', '1-3', '2-3', 'Any']:
             out_dict[country_abb[i]][test][filt] = {}
             for rnd in ['1', '2', '3']:
-                if rnd in filt or filt == 'Round Filter':
+                if rnd in filt or filt == 'Any':
                     out_dict[country_abb[i]][test][filt][rnd] = {}
                     for sjt in ['Math', 'Science']:
                         out_dict[country_abb[i]][test][filt][rnd][sjt] = {}
                         for stat in ['Mean', 'StDev']:
                             out_dict[country_abb[i]][test][filt][rnd][sjt][stat] = {}
-                            for sex in ['Gender', 'Male', 'Female']:
+                            for sex in ['Both', 'Male', 'Female']:
                                 out_dict[country_abb[i]][test][filt][rnd][sjt][stat][sex] = {}
-                                for cont in ['Content', 'Num', 'Alg', 'Geom', 'Data']:
-                                    if test == 'TIMSS' or cont == 'Content':
+                                for cont in ['All', 'Num', 'Alg', 'Geom', 'Data']:
+                                    if test == 'TIMSS' or cont == 'All':
                                         out_dict[country_abb[i]][test][filt][rnd][sjt][stat][sex][cont] = 'NA'
 
 
@@ -59,19 +59,19 @@ def addData(file_name, filt, test):
             sjt = ln[4].replace('"','')
             if country in countries:
                 if test == 'PISA' or test == 'both':
-                    out_dict[countries[country]]['PISA'][filt][rnd][sjt]['Mean']['Gender']['Content'] = ln[6]
-                    out_dict[countries[country]]['PISA'][filt][rnd][sjt]['StDev']['Gender']['Content'] = ln[7]
-                    out_dict[countries[country]]['PISA'][filt][rnd][sjt]['Mean']['Male']['Content'] = ln[14]
-                    out_dict[countries[country]]['PISA'][filt][rnd][sjt]['Mean']['Female']['Content'] = ln[15]
+                    out_dict[countries[country]]['PISA'][filt][rnd][sjt]['Mean']['Both']['All'] = ln[6]
+                    out_dict[countries[country]]['PISA'][filt][rnd][sjt]['StDev']['Both']['All'] = ln[7]
+                    out_dict[countries[country]]['PISA'][filt][rnd][sjt]['Mean']['Male']['All'] = ln[14]
+                    out_dict[countries[country]]['PISA'][filt][rnd][sjt]['Mean']['Female']['All'] = ln[15]
                 if test == 'TIMSS' or test == 'both':
-                    out_dict[countries[country]]['TIMSS'][filt][rnd][sjt]['Mean']['Gender']['Content'] = ln[44]
-                    out_dict[countries[country]]['TIMSS'][filt][rnd][sjt]['StDev']['Gender']['Content'] = ln[45]
-                    out_dict[countries[country]]['TIMSS'][filt][rnd][sjt]['Mean']['Male']['Content'] = ln[52]
-                    out_dict[countries[country]]['TIMSS'][filt][rnd][sjt]['Mean']['Female']['Content'] = ln[53]
-                    out_dict[countries[country]]['TIMSS'][filt][rnd][sjt]['Mean']['Gender']['Num'] = ln[54]
-                    out_dict[countries[country]]['TIMSS'][filt][rnd][sjt]['Mean']['Gender']['Alg'] = ln[55]
-                    out_dict[countries[country]]['TIMSS'][filt][rnd][sjt]['Mean']['Gender']['Geom'] = ln[57]
-                    out_dict[countries[country]]['TIMSS'][filt][rnd][sjt]['Mean']['Gender']['Data'] = ln[58]
+                    out_dict[countries[country]]['TIMSS'][filt][rnd][sjt]['Mean']['Both']['All'] = ln[44]
+                    out_dict[countries[country]]['TIMSS'][filt][rnd][sjt]['StDev']['Both']['All'] = ln[45]
+                    out_dict[countries[country]]['TIMSS'][filt][rnd][sjt]['Mean']['Male']['All'] = ln[52]
+                    out_dict[countries[country]]['TIMSS'][filt][rnd][sjt]['Mean']['Female']['All'] = ln[53]
+                    out_dict[countries[country]]['TIMSS'][filt][rnd][sjt]['Mean']['Both']['Num'] = ln[54]
+                    out_dict[countries[country]]['TIMSS'][filt][rnd][sjt]['Mean']['Both']['Alg'] = ln[55]
+                    out_dict[countries[country]]['TIMSS'][filt][rnd][sjt]['Mean']['Both']['Geom'] = ln[57]
+                    out_dict[countries[country]]['TIMSS'][filt][rnd][sjt]['Mean']['Both']['Data'] = ln[58]
                     out_dict[countries[country]]['TIMSS'][filt][rnd][sjt]['Mean']['Female']['Num'] = ln[59]
                     out_dict[countries[country]]['TIMSS'][filt][rnd][sjt]['Mean']['Male']['Num'] = ln[60]
                     out_dict[countries[country]]['TIMSS'][filt][rnd][sjt]['Mean']['Female']['Alg'] = ln[61]
@@ -98,14 +98,14 @@ def addDataCompare(file_name, filt):
             rnd = ln[3]
             sjt = ln[4].replace('"','')
             if country in countries:
-                out_dict[countries[country]]['Test'][filt][rnd][sjt]['Mean']['Gender']['Content'] = ln[6]
-                out_dict[countries[country]]['Test'][filt][rnd][sjt]['StDev']['Gender']['Content'] = ln[7]
-                out_dict[countries[country]]['Test'][filt][rnd][sjt]['Mean']['Male']['Content'] = ln[14]
-                out_dict[countries[country]]['Test'][filt][rnd][sjt]['Mean']['Female']['Content'] = ln[15]
+                out_dict[countries[country]]['Compare'][filt][rnd][sjt]['Mean']['Both']['All'] = ln[6]
+                out_dict[countries[country]]['Compare'][filt][rnd][sjt]['StDev']['Both']['All'] = ln[7]
+                out_dict[countries[country]]['Compare'][filt][rnd][sjt]['Mean']['Male']['All'] = ln[14]
+                out_dict[countries[country]]['Compare'][filt][rnd][sjt]['Mean']['Female']['All'] = ln[15]
         count = count + 1
     f.close()
 
-addData('one_round.csv', 'Round Filter', 'both')
+addData('one_round.csv', 'Any', 'both')
 addData('round_match_1_PISA.csv', '1-2-3', 'PISA')
 addData('round_match_2_PISA.csv', '1-2', 'PISA')
 addData('round_match_3_PISA.csv', '1-3', 'PISA')
@@ -118,10 +118,10 @@ addDataCompare('round_match_1_comparison.csv', '1-2-3')
 addDataCompare('round_match_2_comparison.csv', '1-2')
 addDataCompare('round_match_3_comparison.csv', '1-3')
 addDataCompare('round_match_4_comparison.csv', '2-3')
-addDataCompare('round_match_5_comparison.csv', 'Round Filter')
-addDataCompare('round_match_6_comparison.csv', 'Round Filter')
-addDataCompare('round_match_7_comparison.csv', 'Round Filter')
+addDataCompare('round_match_5_comparison.csv', 'Any')
+addDataCompare('round_match_6_comparison.csv', 'Any')
+addDataCompare('round_match_7_comparison.csv', 'Any')
 
-with open("take4_country_data.json", 'w') as outfile:
+with open("take5_country_data.json", 'w') as outfile:
     json.dump(out_dict, outfile)
 
